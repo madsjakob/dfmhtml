@@ -17,6 +17,7 @@ namespace dfmhtml
             else
             {
                 Run("test.dfm");
+                Run("test2.dfm");
             }
             
         }
