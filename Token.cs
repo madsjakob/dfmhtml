@@ -36,19 +36,16 @@ namespace dfmhtml
             Console.WriteLine(ToString());
         }
 
-        public virtual string ToHtml()
+        public virtual Html ToHtml()
         {
-            StringBuilder result = new StringBuilder();
-            result.AppendLine("<html>");
-            result.AppendLine("<head><title>dfmhtml</title></head>");
-            result.AppendLine("<body>");
-            AppendHtml(result);
-            result.AppendLine("</body>");
-            result.AppendLine("</html>");
-            return result.ToString();
+            Html result = "html";
+            result.Add("head").Add("title").AddText("dfmhtml");
+            AppendHtml(result.Add("body"));
+            
+            return result;
         }
 
-        public virtual void AppendHtml(StringBuilder html)
+        public virtual void AppendHtml(Html htmlElement)
         {
         }
     }
@@ -74,9 +71,9 @@ namespace dfmhtml
         {
         }
 
-        public override void AppendHtml(StringBuilder html)
+        public override void AppendHtml(Html htmlElement)
         {
-            html.Append(Text.Substring(1, Text.Length - 2));
+            htmlElement.AddText(Text.Substring(1, Text.Length - 2));
         }
     }
 
@@ -86,9 +83,9 @@ namespace dfmhtml
         {
         }
 
-        public override void AppendHtml(StringBuilder html)
+        public override void AppendHtml(Html htmlElement)
         {
-            html.Append(Text);
+            htmlElement.AddText(Text);
         }
     }
 
@@ -107,11 +104,11 @@ namespace dfmhtml
             return _ident + " = " + _value;
         }
 
-        public override void AppendHtml(StringBuilder html)
+        public override void AppendHtml(Html htmlElement)
         {
             if(string.Compare(_ident, "Caption", true) == 0)
             {
-                _value.AppendHtml(html);
+                _value.AppendHtml(htmlElement);
             }
         }
     }
@@ -136,12 +133,12 @@ namespace dfmhtml
             }
         }
 
-        public override void AppendHtml(StringBuilder html)
+        public override void AppendHtml(Html htmlElement)
         {
-            base.AppendHtml(html);
+            base.AppendHtml(htmlElement);
             foreach(Token child in Children)
             {
-                child.AppendHtml(html);
+                child.AppendHtml(htmlElement);
             }
         }
     }
@@ -161,14 +158,45 @@ namespace dfmhtml
             return _name + ": " + _type;
         }
 
-        public override void AppendHtml(StringBuilder html)
+        public override void AppendHtml(Html htmlElement)
         {
-            string tagname = GetTagName();
-            html.AppendFormat("<{0}>\n", tagname);
-            base.AppendHtml(html);
-            html.AppendFormat("</{0}>\n", tagname);
+            htmlElement = GetHtmlElement(htmlElement);
+            htmlElement["id"] = _name;
+            htmlElement["class"] = _type;
+            base.AppendHtml(htmlElement);
         }
 
+        private Html GetHtmlElement(Html parent)
+        {
+            Html result = null;
+            if(string.Compare("TLabel", _type, true) == 0)
+            {
+                result = parent.Add("span");
+            }
+            else if(string.Compare("TTextBox", _type, true) == 0 || string.Compare("TTypeEdit", _type, true) == 0)
+            {
+                result = parent.Add("input");
+                result["type"] = "text";
+            }
+            else if(string.Compare("TCheckBox", _type, true) == 0)
+            {
+                result = parent.Add("input");
+                result["type"] = "checkbox";
+            }
+            else if(string.Compare("TComboBox", _type, true) == 0)
+            {
+                result = parent.Add("select");
+            }
+            else if(string.Compare("TToolButton", _type, true) == 0 || string.Compare("TSpeedButton", _type, true) == 0)
+            {
+                result = parent.Add("button");
+            }
+            else
+            {
+                result = parent.Add("div");
+            }
+            return result;
+        }
         private string GetTagName()
         {
             string tagname = "div";
@@ -179,6 +207,14 @@ namespace dfmhtml
             else if(string.Compare("TTextBox", _type, true) == 0 || string.Compare("TTypeEdit", _type, true) == 0)
             {
                 tagname = "input";
+            }
+            else if(string.Compare("TComboBox", _type, true) == 0)
+            {
+                tagname = "select";
+            }
+            else if(string.Compare("TToolButton", _type, true) == 0 || string.Compare("TSpeedButton", _type, true) == 0)
+            {
+                tagname = "button";
             }
             return tagname;
         }

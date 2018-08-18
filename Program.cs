@@ -33,7 +33,8 @@ namespace dfmhtml
                 {
                     ObjectToken ot = parser.Parse(sr.ReadToEnd());
                     ot.Print();
-                    File.WriteAllText(htmlFilename, ot.ToHtml());
+                    Html html = ot.ToHtml();
+                    html.Save(htmlFilename);
                 }
             }
         }
