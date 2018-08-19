@@ -15,10 +15,6 @@ namespace dfmhtml
         {
             _lex = new Lexer();
             _lex.Lex(input);
-            foreach(Token t in _lex)
-            {
-                Console.WriteLine(t);
-            }
             _currentIndex = 0;
             return ParseGoal();
         }

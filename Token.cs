@@ -36,10 +36,20 @@ namespace dfmhtml
             Console.WriteLine(ToString());
         }
 
-        public virtual Html ToHtml()
+        public virtual Html ToHtml(string styleFilename = null)
         {
+            if(styleFilename == null)
+            {
+                styleFilename = "style.css";
+            }
             Html result = "html";
-            result.Add("head").Add("title").AddText("dfmhtml");
+            Html head = result.Add("head"); 
+            head.Add("title").AddText("dfmhtml");
+            Html link = head.Add("link");
+            link["rel"] = "stylesheet";
+            link["type"] = "text/css";
+            link["href"] = styleFilename;
+
             AppendHtml(result.Add("body"));
             
             return result;
@@ -106,10 +116,27 @@ namespace dfmhtml
 
         public override void AppendHtml(Html htmlElement)
         {
-            if(string.Compare(_ident, "Caption", true) == 0)
+            if(Is("Caption"))
             {
                 _value.AppendHtml(htmlElement);
             }
+            else if(Is("align"))
+            {
+                if(_value.Text == "alTop")
+                {
+                    htmlElement.SetStyle("position", "relative");
+                    htmlElement.SetStyle("width", "100%");
+                }
+            }
+            else if(Is("Left") || Is("top") || Is("right") || Is("bottom") || Is("height") || Is("width"))
+            {
+                htmlElement.SetStyle(_ident.ToLower(), _value.Text);
+            }
+        }
+
+        private bool Is(string name)
+        {
+            return string.Compare(_ident, name, true) == 0;
         }
     }
 
@@ -164,59 +191,54 @@ namespace dfmhtml
             htmlElement["id"] = _name;
             htmlElement["class"] = _type;
             base.AppendHtml(htmlElement);
+            if(Is("TGroupBox"))
+            {
+                // Move text to the box
+                // InsertHtml("span").AddText(this.Text);
+            }
         }
 
         private Html GetHtmlElement(Html parent)
         {
             Html result = null;
-            if(string.Compare("TLabel", _type, true) == 0)
+            if(Is("TLabel"))
             {
                 result = parent.Add("span");
             }
-            else if(string.Compare("TTextBox", _type, true) == 0 || string.Compare("TTypeEdit", _type, true) == 0)
+            else if(Is("TTextBox") || Is("TTypeEdit"))
             {
                 result = parent.Add("input");
                 result["type"] = "text";
             }
-            else if(string.Compare("TCheckBox", _type, true) == 0)
+            else if(Is("TCheckBox"))
             {
                 result = parent.Add("input");
                 result["type"] = "checkbox";
             }
-            else if(string.Compare("TComboBox", _type, true) == 0)
+            else if(Is("TComboBox"))
             {
                 result = parent.Add("select");
             }
-            else if(string.Compare("TToolButton", _type, true) == 0 || string.Compare("TSpeedButton", _type, true) == 0)
+            else if(Is("TToolButton") || Is("TSpeedButton"))
             {
                 result = parent.Add("button");
             }
             else
             {
                 result = parent.Add("div");
+                if(Is("TGroupBox"))
+                {
+                    result.SetStyle("border", "1px solid black");
+                }
             }
+            result.Style.Add("position", "absolute");
+                
             return result;
         }
-        private string GetTagName()
+
+        private bool Is(string name)
         {
-            string tagname = "div";
-            if(string.Compare("TLabel", _type, true) == 0)
-            {
-                tagname = "span";
-            }
-            else if(string.Compare("TTextBox", _type, true) == 0 || string.Compare("TTypeEdit", _type, true) == 0)
-            {
-                tagname = "input";
-            }
-            else if(string.Compare("TComboBox", _type, true) == 0)
-            {
-                tagname = "select";
-            }
-            else if(string.Compare("TToolButton", _type, true) == 0 || string.Compare("TSpeedButton", _type, true) == 0)
-            {
-                tagname = "button";
-            }
-            return tagname;
+            return string.Compare(_type, name, true) == 0;
         }
     }
 

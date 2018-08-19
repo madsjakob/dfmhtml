@@ -27,14 +27,14 @@ namespace dfmhtml
             if(File.Exists(dfmFilename))
             {
                 string htmlFilename = Path.ChangeExtension(dfmFilename, ".html");
+                string cssFilename = Path.ChangeExtension(dfmFilename, ".css");
                 Console.WriteLine("Converting {0} to {1}", dfmFilename, htmlFilename);
                 Parser parser = new Parser();
                 using(StreamReader sr = new StreamReader(dfmFilename))
                 {
                     ObjectToken ot = parser.Parse(sr.ReadToEnd());
-                    ot.Print();
-                    Html html = ot.ToHtml();
-                    html.Save(htmlFilename);
+                    Html html = ot.ToHtml(cssFilename);
+                    html.Save(htmlFilename, cssFilename);
                 }
             }
         }

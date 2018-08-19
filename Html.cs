@@ -61,6 +61,28 @@ namespace dfmhtml
             }
         }
 
+        private Dictionary<string, string> _style = new Dictionary<string, string>();
+        public Dictionary<string,string> Style
+        {
+            get { return _style; }
+        }
+
+        public void SetStyle(string name, string value)
+        {
+            if(value == null && _style.ContainsKey(name))
+            {
+                _style.Remove(name);
+            }
+            else if(!_style.ContainsKey(name))
+            {
+                _style.Add(name, value);
+            }
+            else
+            {
+                _style[name] = value;
+            }
+        }
+
         public Html Add(string name)
         {
             Html result = name;
@@ -73,11 +95,19 @@ namespace dfmhtml
             _text = text;
         }
 
-        public void Save(string filename)
+        public void Save(string filename, string styleFilename = null)
         {
+            if(styleFilename == null)
+            {
+                styleFilename = "style.css";
+            }
             using(StreamWriter sw = new StreamWriter(filename))
             {
                 AddHtml(sw, 0);
+            }
+            using(StreamWriter sw = new StreamWriter(styleFilename))
+            {
+                AddStyle(sw, 0);
             }
         }
 
@@ -111,6 +141,26 @@ namespace dfmhtml
             sw.Write("</");
             sw.Write(_elementName);
             sw.WriteLine(">");
+        }
+
+        private void AddStyle(StreamWriter sw, int level)
+        {
+            if(_style.Count > 0 && !string.IsNullOrWhiteSpace(this["id"]))
+            {
+                sw.Write("#{0}", this["id"]);
+                sw.WriteLine(" {");
+                foreach(string key in _style.Keys)
+                {
+                    sw.WriteLine("{0}: {1};", key, _style[key]);
+                }
+                sw.WriteLine("}");
+                sw.WriteLine();
+            }
+
+            foreach(Html element in _children)
+            {
+                element.AddStyle(sw, level + 1);
+            }
         }
     }
 
