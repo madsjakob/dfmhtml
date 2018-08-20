@@ -18,6 +18,7 @@ namespace dfmhtml
             {
                 Run("test.dfm");
                 Run("test2.dfm");
+                Run("test3.dfm");
             }
             
         }

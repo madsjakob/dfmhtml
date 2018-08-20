@@ -99,13 +99,65 @@ namespace dfmhtml
         }
     }
 
+    public class BinaryToken : Token
+    {
+        public BinaryToken() : base("")
+        {
+
+        }
+
+        private List<byte> _bytes = new List<byte>();
+
+        public void AppendData(Token token)
+        {
+            string text = token.Text;
+            for(int index = 0; index < text.Length; index += 2)
+            {
+                _bytes.Add(Convert.ToByte(text.Substring(index, 2), 16));
+            }
+        }
+
+        public string GetValue()
+        {
+            return Convert.ToBase64String(_bytes.ToArray());
+        }
+    }
+
+    public class IdentToken : Token
+    {
+        private string _name;
+        public string Name 
+        {
+            get { return _name; }
+        }
+        public IdentToken(Token t) : base("")
+        {
+            _name = t.Text;
+
+        }
+
+        public void Append(IdentToken t)
+        {
+            _name += "." + t.Name;
+        }
+
+        public override string ToString()
+        {
+            return _name;
+        }
+    }
+
     public class PropertyToken : Token
     {
         private string _ident;
         private Token _value;
-        public PropertyToken(Token ident, Token value) : base("")
+        public Token Value
         {
-            _ident = ident.Text;
+            get { return _value; }
+        }
+        public PropertyToken(IdentToken ident, Token value) : base("")
+        {
+            _ident = ident.Name;
             _value = value;
         }
 
@@ -134,7 +186,7 @@ namespace dfmhtml
             }
         }
 
-        private bool Is(string name)
+        public bool Is(string name)
         {
             return string.Compare(_ident, name, true) == 0;
         }
@@ -198,6 +250,24 @@ namespace dfmhtml
             }
         }
 
+        private PropertyToken GetProperty(string name)
+        {
+            PropertyToken result = null;
+            int index = 0;
+            while(index < Children.Count && result == null)
+            {
+                if(Children[index] is PropertyToken && (Children[index] as PropertyToken).Is(name))
+                {
+                    result = Children[index] as PropertyToken;
+                }
+                else
+                {
+                    index++;
+                }
+            }
+            return result;
+        }
+
         private Html GetHtmlElement(Html parent)
         {
             Html result = null;
@@ -222,6 +292,15 @@ namespace dfmhtml
             else if(Is("TToolButton") || Is("TSpeedButton") || Is("TButton"))
             {
                 result = parent.Add("button");
+            }
+            else if(Is("TImage"))
+            {
+                result = parent.Add("img");
+                PropertyToken imageData = GetProperty("Picture.Data");
+                if(imageData != null)
+                {
+                    result["src"] = "data:image/jpg;base64," + (imageData.Value as BinaryToken).GetValue();
+                }
             }
             else
             {

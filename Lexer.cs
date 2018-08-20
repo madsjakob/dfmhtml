@@ -33,6 +33,10 @@ namespace dfmhtml
                 {
                     ReadString();
                 }
+                else if (c == '{')
+                {
+                    ReadBinaryData();
+                }
                 else if (char.IsWhiteSpace(c))
                 {
                     Add(new WhiteSpace(NextChar()));
@@ -79,6 +83,34 @@ namespace dfmhtml
                 buffer.Append(NextChar());
             }
             Add(buffer);
+        }
+
+        private void ReadBinaryData()
+        {
+            Add(NextChar());
+            StringBuilder buffer = new StringBuilder();
+            while(Peek() != '}')
+            {
+                char c = NextChar();
+                if(char.IsWhiteSpace(c))
+                {
+                    if(buffer.Length > 0)
+                    {
+                        Add(buffer);
+                        buffer.Clear();
+                    }
+                    Add(new WhiteSpace(c));
+                }
+                else
+                {
+                    buffer.Append(c);
+                }
+            }
+            if(buffer.Length > 0)
+            {
+                Add(buffer);
+            }
+            Add(NextChar());
         }
 
         private void ReadString()

@@ -73,20 +73,21 @@ namespace dfmhtml
         private Token ParseProperty()
         {
 
-            Token qualid = ParseQualifiedIdent();
+            IdentToken qualid = ParseQualifiedIdent();
             ParseSpecialChar('=');
             Token value = ParsePropertyValue();
 
             return new PropertyToken(qualid, value);
         }
 
-        private Token ParseQualifiedIdent()
+        private IdentToken ParseQualifiedIdent()
         {
-            Token result = NextToken();
+            IdentToken result = ParseIdentifier();
             while(PeekSpecialChar('.'))
             {
                 ParseSpecialChar('.');
-                NextToken();
+                result.Append(ParseIdentifier());
+                
             }
             return result;
 
@@ -115,7 +116,7 @@ namespace dfmhtml
             {
                 value = ParsePositionData();
             }
-            else if(false)
+            else if(PeekSpecialChar('{'))
             {
                 value = ParseBinary();
             }
@@ -131,14 +132,13 @@ namespace dfmhtml
             Token result = ParseSpecialChar('[');
             while(!PeekSpecialChar(']'))
             {
-                Console.WriteLine(NextToken());
+                ParseIdentifier();
                 if(PeekSpecialChar(','))
                 {
                     ParseSpecialChar(',');
                 }
             }
             ParseSpecialChar(']');
-            Console.WriteLine("[");
             return result;
         }
 
@@ -147,9 +147,20 @@ namespace dfmhtml
             Token result = ParseSpecialChar('<');
             while(!PeekSpecialChar('>'))
             {
-                NextToken();
+                ParseItem();
             }
             ParseSpecialChar('>');
+            return result;
+        }
+
+        private Token ParseItem()
+        {
+            Token result = ParseKeyword("item");
+            while(!PeekKeyword("end"))
+            {
+                ParseProperty();
+            }
+            ParseKeyword("end");
             return result;
         }
 
@@ -158,26 +169,28 @@ namespace dfmhtml
             Token result = ParseSpecialChar('(');
             while(!PeekSpecialChar(')'))
             {
-                Console.WriteLine(NextToken());
+                Console.WriteLine("PositionData: " + NextToken());
             }
             ParseSpecialChar(')');
             return result;
         }
 
-        private Token ParseBinary()
+        private BinaryToken ParseBinary()
         {
-            return NextToken();
+            ParseSpecialChar('{');
+            BinaryToken result = new BinaryToken();
+            while(!PeekSpecialChar('}'))
+            {
+                Token temp = NextToken();
+                result.AppendData(temp);
+            }
+            ParseSpecialChar('}');
+            return result;
         }
 
-        private Token ParseIdentifier()
+        private IdentToken ParseIdentifier()
         {
-            Token result = NextToken();
-            while(PeekSpecialChar(','))
-            {
-                ParseSpecialChar(',');
-                NextToken();
-            }
-            return result;
+            return new IdentToken(NextToken());
         }
 
         private Token Peek()
