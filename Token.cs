@@ -219,7 +219,7 @@ namespace dfmhtml
             {
                 result = parent.Add("select");
             }
-            else if(Is("TToolButton") || Is("TSpeedButton"))
+            else if(Is("TToolButton") || Is("TSpeedButton") || Is("TButton"))
             {
                 result = parent.Add("button");
             }
