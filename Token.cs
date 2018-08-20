@@ -174,10 +174,16 @@ namespace dfmhtml
             }
             else if(Is("align"))
             {
-                if(_value.Text == "alTop")
+                if((_value as IdentToken).Name == "alTop")
                 {
                     htmlElement.SetStyle("position", "relative");
                     htmlElement.SetStyle("width", "100%");
+                }
+                else if((_value as IdentToken).Name == "alBottom")
+                {
+                    htmlElement.SetStyle("bottom", "0px");
+                    htmlElement.SetStyle("left", "0px");
+                    htmlElement.SetStyle("right", "0px");
                 }
             }
             else if(Is("Left") || Is("top") || Is("right") || Is("bottom") || Is("height") || Is("width"))
