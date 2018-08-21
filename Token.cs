@@ -45,10 +45,16 @@ namespace dfmhtml
             Html result = "html";
             Html head = result.Add("head"); 
             head.Add("title").AddText("dfmhtml");
+            Html baseLink = head.Add("link");
+            baseLink["rel"] = "stylesheet";
+            baseLink["type"] = "text/css";
+            baseLink["href"] = "base.css";
+            
             Html link = head.Add("link");
             link["rel"] = "stylesheet";
             link["type"] = "text/css";
             link["href"] = styleFilename;
+            
 
             AppendHtml(result.Add("body"));
             
@@ -101,6 +107,7 @@ namespace dfmhtml
 
     public class BinaryToken : Token
     {
+        private string _name;
         public BinaryToken() : base("")
         {
 
@@ -111,15 +118,48 @@ namespace dfmhtml
         public void AppendData(Token token)
         {
             string text = token.Text;
-            for(int index = 0; index < text.Length; index += 2)
+            int index = 0;
+            if(_bytes.Count == 0)
+            {
+                _name = "";
+                byte b = Convert.ToByte(text.Substring(index, 2), 16);
+                index += 2;
+                while(b > 0)
+                {
+                    _name += (char) Convert.ToByte(text.Substring(index, 2), 16);
+                    index += 2;
+                    b--;
+                }
+                if(string.Compare(_name, "TJpegImage", true) == 0)
+                {
+                    // 8 bytes used for something
+                    index += 8;
+                }
+                else if (string.Compare(_name, "TBitmap", true) == 0)
+                {
+
+                }
+            }
+            while(index < text.Length)
             {
                 _bytes.Add(Convert.ToByte(text.Substring(index, 2), 16));
+                index += 2;
             }
         }
 
         public string GetValue()
         {
-            return Convert.ToBase64String(_bytes.ToArray());
+            string result = "data:image/";
+            if(string.Compare(_name, "TJpegImage", true) == 0)
+            {
+                result += "jpg";
+            }
+            else 
+            {
+                result += "png";
+            }
+            result += ";base64,";
+            return result + Convert.ToBase64String(_bytes.ToArray());
         }
     }
 
@@ -189,6 +229,10 @@ namespace dfmhtml
             else if(Is("Left") || Is("top") || Is("right") || Is("bottom") || Is("height") || Is("width"))
             {
                 htmlElement.SetStyle(_ident.ToLower(), _value.Text);
+            }
+            else if(Is("Color"))
+            {
+                htmlElement.SetStyle("background-color", "var(--color-" + _value.ToString() + ")");
             }
         }
 
@@ -286,6 +330,10 @@ namespace dfmhtml
                 result = parent.Add("input");
                 result["type"] = "text";
             }
+            else if(Is("TMemo"))
+            {
+                result = parent.Add("textarea");
+            }
             else if(Is("TCheckBox"))
             {
                 result = parent.Add("input");
@@ -305,7 +353,7 @@ namespace dfmhtml
                 PropertyToken imageData = GetProperty("Picture.Data");
                 if(imageData != null)
                 {
-                    result["src"] = "data:image/jpg;base64," + (imageData.Value as BinaryToken).GetValue();
+                    result["src"] = (imageData.Value as BinaryToken).GetValue();
                 }
             }
             else
