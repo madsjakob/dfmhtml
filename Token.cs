@@ -325,19 +325,25 @@ namespace dfmhtml
             {
                 result = parent.Add("span");
             }
+            else if(Is("TMemo"))
+            {
+                result = parent.Add("textarea");
+            }
             else if(Is("TTextBox") || Is("TTypeEdit"))
             {
                 result = parent.Add("input");
                 result["type"] = "text";
             }
-            else if(Is("TMemo"))
-            {
-                result = parent.Add("textarea");
-            }
             else if(Is("TCheckBox"))
             {
                 result = parent.Add("input");
                 result["type"] = "checkbox";
+            }
+            else if(Is("TRadioButton"))
+            {
+                result = parent.Add("input");
+                result["type"] = "radio";
+                result["name"] = "_rdio" + parent.GetHashCode().ToString();
             }
             else if(Is("TComboBox"))
             {
