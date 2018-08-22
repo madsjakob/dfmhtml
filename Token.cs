@@ -276,7 +276,8 @@ namespace dfmhtml
         public TokenList Children
         {
             get { return _children; }
-        }public ParentToken(string text) : base(text)
+        }
+        public ParentToken(string text) : base(text)
         {
             _children = new TokenList();
         }
@@ -298,6 +299,15 @@ namespace dfmhtml
                 child.AppendHtml(htmlElement);
             }
         }
+    }
+
+    public class SetToken : ParentToken
+    {
+        public SetToken() : base("")
+        {
+            
+        }
+
     }
 
     public class ObjectToken : ParentToken

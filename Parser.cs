@@ -127,12 +127,13 @@ namespace dfmhtml
             return value;
         }
 
-        private Token ParseSet()
+        private SetToken ParseSet()
         {
-            Token result = ParseSpecialChar('[');
+            ParseSpecialChar('[');
+            SetToken result = new SetToken();
             while(!PeekSpecialChar(']'))
             {
-                ParseIdentifier();
+                result.Children.Add(ParseIdentifier());
                 if(PeekSpecialChar(','))
                 {
                     ParseSpecialChar(',');
