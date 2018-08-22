@@ -216,13 +216,18 @@ namespace dfmhtml
             {
                 if((_value as IdentToken).Name == "alTop")
                 {
-                    htmlElement.SetStyle("position", "relative");
-                    htmlElement.SetStyle("width", "100%");
+                    htmlElement.SetStyle("left", "0px");
+                    htmlElement.SetStyle("right", "0px");
                 }
                 else if((_value as IdentToken).Name == "alBottom")
                 {
                     htmlElement.SetStyle("bottom", "0px");
                     htmlElement.SetStyle("left", "0px");
+                    htmlElement.SetStyle("right", "0px");
+                }
+                else if((_value as IdentToken).Name == "alClient")
+                {
+                    htmlElement.SetStyle("bottom", "0px");
                     htmlElement.SetStyle("right", "0px");
                 }
             }
@@ -233,6 +238,29 @@ namespace dfmhtml
             else if(Is("Color"))
             {
                 htmlElement.SetStyle("background-color", "var(--color-" + _value.ToString() + ")");
+            }
+            else if(Is("Alignment"))
+            {
+                if(_value.ToString() == "taCenter")
+                {
+                    htmlElement.SetStyle("text-align", "center");
+                }
+                else if(_value.ToString() == "taRightJustify")
+                {
+                    htmlElement.SetStyle("text-align", "right");
+                }
+                else if(_value.ToString() == "taLeftJustify")
+                {
+                    htmlElement.SetStyle("text-align", "left");
+                }
+            }
+            else if(Is("Style"))
+            {
+                htmlElement["class"] = _value.ToString();
+            }
+            else if(Is("ImageIndex"))
+            {
+                htmlElement["class"] = htmlElement["class"] + " toolimage";
             }
         }
 
@@ -365,10 +393,6 @@ namespace dfmhtml
             else
             {
                 result = parent.Add("div");
-                if(Is("TGroupBox"))
-                {
-                    result.SetStyle("border", "1px solid black");
-                }
             }
             result.Style.Add("position", "absolute");
                 

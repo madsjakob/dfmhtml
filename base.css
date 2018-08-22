@@ -5,3 +5,28 @@
     font-family: Arial, Helvetica, sans-serif;
     font-size: 8.25pt;
 }
+
+textarea {
+    resize: none;
+}
+
+.tbsSeparator {
+    background-color: red;
+}
+
+.toolimage {
+    padding-left: 16px;
+}
+
+.TGroupBox {
+    border: 1px solid black;
+}
+
+.TPanel, .TGroupBox {
+    background-color: var(--color-clBtnFace);
+}
+/*
+div {
+     background-color: blue; 
+} 
+*/
